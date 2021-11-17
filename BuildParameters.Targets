@@ -1,0 +1,67 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" />
+  <!-- Overriding the Microsoft.CSharp.targets target dependency chain -->
+  <!-- Call our custom AssemblyVersion target before build, even from VS -->
+  <PropertyGroup>
+    <BuildDependsOn>
+      RenameCompanyName;
+      RenameProduct;
+      ChangeVersion;
+      $(BuildDependsOn)
+    </BuildDependsOn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Product>Жұлдыз</Product>
+    <CompanyName></CompanyName>
+    <Major></Major>
+    <Minor></Minor>
+    <Year></Year>
+  </PropertyGroup>
+  
+    <Target Name="RenameCompanyName" Condition="$(BuildingInsideVisualStudio)!='true' and $(CompanyName)!=''">
+      <Message Text="BuildingInsideVisualStudio $(BuildingInsideVisualStudio)" Importance="high"  />
+      <Message Text="CompanyName $(CompanyName)" Importance="high"  />
+      <ItemGroup>
+        <AssemblyVersionFiles Include="..\SharedAssemblyInfo.cs"/>
+      </ItemGroup>
+
+      <FileUpdate 
+            Files="@(AssemblyVersionFiles)"
+            Regex="(.*AssemblyCompany\(&quot;)(.*)(&quot;\)])"
+            ReplacementText="$1$(CompanyName)$3"/>
+      
+      <FileUpdate
+            Files="@(AssemblyVersionFiles)"
+            Regex="(.*AssemblyCopyright\(&quot;)(.*)(&quot;\)])"
+            ReplacementText="$1Copyright © $(Year) $(CompanyName)$3"/>
+    </Target>
+  
+
+
+  <Target Name="RenameProduct" Condition="$(BuildingInsideVisualStudio)!='true' and $(Product)!=''">
+    <Message Text="BuildingInsideVisualStudio $(BuildingInsideVisualStudio)" Importance="high"  />
+    <Message Text="Product $(Product)" Importance="high"  />
+    <ItemGroup>
+      <AssemblyVersionFiles Include="..\SharedAssemblyInfo.cs"/>
+    </ItemGroup>
+
+    <FileUpdate
+          Files="@(AssemblyVersionFiles)"
+          Regex="(.*AssemblyProduct\(&quot;)(.*)(&quot;\)])"
+          ReplacementText="$1$(Product)$3"/>
+  </Target>
+
+  <Target Name="ChangeVersion" Condition="$(BuildingInsideVisualStudio)!='true' and $(Major)!='' and $(Minor)!=''">
+    <Message Text="BuildingInsideVisualStudio $(BuildingInsideVisualStudio)" Importance="high"  />
+    <Message Text="Version $(Major).$(Minor)" Importance="high"  />
+    <ItemGroup>
+      <AssemblyVersionFiles Include="..\SharedAssemblyInfo.cs"/>
+    </ItemGroup>
+
+    <FileUpdate
+          Files="@(AssemblyVersionFiles)"
+          Regex="(.*AssemblyVersion\(&quot;)(.*)(&quot;\)])"
+          ReplacementText="[assembly: AssemblyVersion(&quot;$(Major).$(Minor).*$3"/>
+  </Target>
+</Project>
+
